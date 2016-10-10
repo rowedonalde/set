@@ -1,3 +1,4 @@
+from board import SetBoard
 from card import SetCard
 from color import SetColor
 from deck import SetDeck

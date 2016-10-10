@@ -1,3 +1,5 @@
+import random
+
 from card import SetCard
 from color import SetColor
 from shading import SetShading
@@ -24,3 +26,8 @@ class SetDeck(object):
     @property
     def cards(self):
         return self.cards_by_encoding.values()
+
+    def draw_random(self):
+        encoding_key = random.choice(self.cards_by_encoding.keys())
+
+        return self.cards_by_encoding.pop(encoding_key)
