@@ -6,7 +6,7 @@ from shape import SetShape
 class SetDeck(object):
 
     def __init__(self):
-        self.cards = []
+        self.cards_by_encoding = {}
         # Borrowed from the test code that proves we can
         # generate all the cards:
         for count in range(1, 3 + 1):
@@ -19,4 +19,8 @@ class SetDeck(object):
                             shading=shading,
                             shape=shape
                         )
-                        self.cards.append(card)
+                        self.cards_by_encoding[card.encoding] = card
+
+    @property
+    def cards(self):
+        return self.cards_by_encoding.values()
