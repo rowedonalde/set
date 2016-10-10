@@ -72,3 +72,19 @@ class TestSetGameCard(unittest.TestCase):
                 shading=SetShading.solid,
                 shape=None
             )
+
+    def test_generate_card_encodings(self):
+        expected_encoding = 0
+        for color in (SetColor.red, SetColor.green, SetColor.purple):
+            for shading in (SetShading.solid, SetShading.empty, SetShading.striped):
+                for shape in (SetShape.diamond, SetShape.squiggles, SetShape.oval):
+                    for count in range(1, 3 + 1):
+                        card = SetCard(
+                            count=count,
+                            color=color,
+                            shading=shading,
+                            shape=shape
+                        )
+
+                        self.assertEqual(expected_encoding, card.encoding)
+                        expected_encoding += 1

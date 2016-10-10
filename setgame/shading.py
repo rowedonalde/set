@@ -1,6 +1,6 @@
-from aenum import Enum
+from aenum import IntEnum
 
-class SetShading(Enum):
+class SetShading(IntEnum):
     solid = 0
     empty = 1
     striped = 2
