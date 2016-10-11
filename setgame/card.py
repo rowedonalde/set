@@ -1,4 +1,5 @@
 from color import SetColor
+from exponent import EncodingExponents
 from shading import SetShading
 from shape import SetShape
 
@@ -41,11 +42,25 @@ class SetCard(object):
             self._encoding = 0
 
             # Color is highest trit:
-            self._encoding += (3**3) * int(self.color)
+            #self._encoding += (3**3) * int(self.color)
 
             # And so on:
-            self._encoding += (3**2) * int(self.shading)
-            self._encoding += 3 * int(self.shape)
-            self._encoding += self.count - 1
+            #self._encoding += (3**2) * int(self.shading)
+            #self._encoding += 3 * int(self.shape)
+            #self._encoding += self.count - 1
+
+            # Generate 4-trit ternary encoding where each trit represents
+            # one of the three values an attribute can have:
+            exponent_to_attribute = {
+                EncodingExponents.color: self.color,
+                EncodingExponents.shading: self.shading,
+                EncodingExponents.shape: self.shape,
+                # We want 0, 1, and 2 instead of 1, 2, and 3:
+                EncodingExponents.count: self.count - 1
+            }
+
+            for exp in exponent_to_attribute:
+                value = exponent_to_attribute[exp]
+                self._encoding += (3 ** exp) * value
 
         return self._encoding
