@@ -7,22 +7,77 @@ class SetBoard(object):
         self.deck = deck
 
         self.cards_by_encoding = {}
+        self.graveyard_by_encoding = {}
 
     @property
     def cards(self):
         return self.cards_by_encoding.values()
 
+    @property
+    def graveyard(self):
+        return self.graveyard_by_encoding.values()
+
     def setup(self):
+        '''Draw enough cards at random to start a game.'''
+
         for i in range(SetBoard.start_size):
             self.draw_from_deck()
 
         return self.cards_by_encoding
 
     def draw_from_deck(self):
+        '''
+        Remove one card randomly from the deck and put
+        it on the board.'''
+
         card = self.deck.draw_random()
         self.cards_by_encoding[card.encoding] = card
 
         return card
+
+    def remove_set(self, encoding_1, encoding_2, encoding_3):
+        '''
+        Move the cards denoted by the encodings into the
+        graveyard and return those cards as well. This happens
+        transactionally so if one of the keys is not actually
+        on the board, any cards that did get moved are rolled
+        back before the KeyError propagates.'''
+
+        tx = {}
+
+        for encoding in (encoding_1, encoding_2, encoding_3):
+            try:
+                tx[encoding] = self.cards_by_encoding.pop(encoding)
+            except KeyError:
+                # Rollback transaction:
+                self.cards_by_encoding.update(tx)
+                raise
+
+        self.graveyard_by_encoding.update(tx)
+        return tx
+
+    def find_set(self):
+        '''
+        Return a valid set of three cards from the board or
+        None if there are no valid sets on the board.'''
+
+        return None
+
+        # Search greedily for valid sets, and only compare
+        # forward against cards we haven't tried so we don't
+        # duplicate work:
+        #encodings = self.cards_by_encoding.keys()
+
+        #for i in range(len(encodings)):
+        #    encoding_1 = encodings[i]
+        #    for encoding_2 in encodings[i+1:]:
+        #        encoding_3 = SetBoard.missing_encoding_from(
+        #            encoding_1,
+        #            encoding_2,
+        #        )
+
+        #        try:
+        #            return self.remove_set(encoding_3, encoding_2, encoding_1)
 
     @staticmethod
     def missing_encoding_from(card_encoding_1, card_encoding_2):
