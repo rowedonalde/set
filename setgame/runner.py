@@ -7,10 +7,16 @@ class SetRunner(object):
         self.deck = SetDeck()
         self.board = SetBoard(self.deck)
         self.quiet = quiet
+        self.sets_found = []
 
     def log(self, s=''):
         if not self.quiet:
             print s
+
+    def call_set(self, found_set):
+        self.log('Set!')
+        self.log('Found a set:\n{0}'.format(found_set))
+        self.sets_found.append(found_set)
 
     def play(self):
         self.log('Starting a game of Set!')
@@ -21,16 +27,14 @@ class SetRunner(object):
         self.log('Initial board:\n{0}'.format(self.board))
         self.log()
         self.log('Looking for sets')
-        self.log
+        self.log()
 
         first_hand = self.board.find_set()
 
         if first_hand is None:
             self.log('Hmm, no sets so far...')
         else:
-            self.log('Set!')
-            self.log('Found a set in the first 12 cards:')
-            self.log(first_hand)
+            self.call_set(first_hand)
 
         while self.deck.cards:
             self.log()
@@ -45,8 +49,7 @@ class SetRunner(object):
             if next_hand is None:
                 self.log('Didn\'t find any sets!')
             else:
-                self.log('Set!')
-                self.log('Found a set:\n{0}'.format(next_hand))
+                self.call_set(next_hand)
 
         self.log()
         self.log('Now the deck is empty, so let\'s burn down what we have:')
@@ -59,8 +62,7 @@ class SetRunner(object):
             self.log()
 
             if next_hand:
-                self.log('Set!')
-                self.log('Found a set:\n{0}'.format(next_hand))
+                self.call_set(next_hand)
                 self.log()
                 self.log('Now the board is:\n{0}'.format(self.board))
 
@@ -72,6 +74,16 @@ class SetRunner(object):
             self.log(self.board)
         else:
             self.log('We were able to make sets using all the cards!')
+
+        self.log()
+        self.log('Here are the sets that we found:')
+        self.log()
+
+        for hand in self.sets_found:
+            self.log(hand)
+            self.log()
+
+        return self.sets_found
 
 if __name__ == '__main__':
     runner = SetRunner()

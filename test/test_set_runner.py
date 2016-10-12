@@ -8,7 +8,13 @@ class TestSetRunner(unittest.TestCase):
         runner = SetRunner(quiet=True)
         self.assertEqual(81, len(runner.deck.cards))
 
-        runner.play()
+        sets_found = runner.play()
 
         self.assertEqual(0, len(runner.deck.cards))
         self.assertEqual(81, len(runner.board.cards) + len(runner.board.graveyard))
+
+        self.assertTrue(len(sets_found) > 0)
+
+        total_cards = 3 * len(sets_found) + len(runner.board.cards)
+
+        self.assertEqual(81, total_cards)
