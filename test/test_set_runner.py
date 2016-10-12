@@ -5,7 +5,7 @@ from setgame import SetRunner
 class TestSetRunner(unittest.TestCase):
 
     def test_set_runner_deck_is_empty_after_game(self):
-        runner = SetRunner()
+        runner = SetRunner(quiet=True)
         self.assertEqual(81, len(runner.deck.cards))
 
         runner.play()
