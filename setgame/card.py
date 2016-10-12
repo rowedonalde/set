@@ -36,18 +36,23 @@ class SetCard(object):
 
         self.shape = shape
 
+    def __str__(self):
+        outstr = '{0} {1} {2} {3}'.format(
+            self.count,
+            SetColor.format(self.color),
+            SetShading.format(self.shading),
+            SetShape.format(self.shape)
+        )
+
+        if self.count > 1:
+            outstr += 's'
+
+        return outstr
+
     @property
     def encoding(self):
         if self._encoding is None:
             self._encoding = 0
-
-            # Color is highest trit:
-            #self._encoding += (3**3) * int(self.color)
-
-            # And so on:
-            #self._encoding += (3**2) * int(self.shading)
-            #self._encoding += 3 * int(self.shape)
-            #self._encoding += self.count - 1
 
             # Generate 4-trit ternary encoding where each trit represents
             # one of the three values an attribute can have:

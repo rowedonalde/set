@@ -88,3 +88,26 @@ class TestSetGameCard(unittest.TestCase):
 
                         self.assertEqual(expected_encoding, card.encoding)
                         expected_encoding += 1
+
+    def test_card_to_string(self):
+        card = SetCard(
+            count=1,
+            color=SetColor.red,
+            shading=SetShading.solid,
+            shape=SetShape.oval
+        )
+
+        expected_string = '1 red solid oval'
+
+        self.assertEqual(expected_string, str(card))
+
+        card = SetCard(
+            count=2,
+            color=SetColor.green,
+            shading=SetShading.solid,
+            shape=SetShape.oval
+        )
+
+        expected_string = '2 green solid ovals'
+
+        self.assertEqual(expected_string, str(card))
