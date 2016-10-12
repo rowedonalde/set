@@ -15,6 +15,10 @@ class SetBoard(object):
         # Value: list of Python sets of two other encodings
         self.waitlist = {}
 
+    def __str__(self):
+        strs = [str(card) for card in self.cards]
+        return '\n'.join(strs)
+
     @property
     def cards(self):
         return self.cards_by_encoding.values()
