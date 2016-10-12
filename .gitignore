@@ -17,3 +17,6 @@ pip-selfcheck.json
 
 # vim
 *.swp
+
+# OSX:
+.DS_Store
