@@ -25,6 +25,28 @@ class TestSetGameBoard(unittest.TestCase):
             shape=SetShape.oval
         )
 
+    def contrive_no_match_in_deck(self):
+        # Force a deal-out from the deck to return this hand
+        # that does not make a valid set:
+        self.card3 = SetCard(
+            count=3,
+            color=SetColor.purple,
+            shading=SetShading.solid,
+            shape=SetShape.oval
+        )
+        self.encoding1 = self.card1.encoding
+        self.encoding2 = self.card2.encoding
+        self.encoding3 = self.card3.encoding
+
+        non_matching_hand = SetHand(self.card1, self.card2, self.card3)
+        self.assertFalse(non_matching_hand.is_set())
+
+        self.deck.cards_by_encoding = {
+            self.encoding1: self.card1,
+            self.encoding2: self.card2,
+            self.encoding3: self.card3
+        }
+
     def test_board_init_leaves_cards_be(self):
         self.assertEqual(81, len(self.deck.cards))
         self.assertEqual(0, len(self.SUT.cards))
@@ -88,20 +110,17 @@ class TestSetGameBoard(unittest.TestCase):
         self.assertEqual(2, len(self.SUT.cards))
         self.assertEqual(0, len(self.SUT.graveyard))
 
-    def test_board_find_set_returns_None_if_no_set_and_adds_to_waitlist(self):
+    def test_board_remove_set_returns_SetHand_of_denoted_cards(self):
         encoding1 = self.card1.encoding
         encoding2 = self.card2.encoding
+
         card3 = SetCard(
             count=3,
             color=SetColor.purple,
             shading=SetShading.solid,
-            shape=SetShape.oval
+            shape=SetShape.diamond
         )
         encoding3 = card3.encoding
-
-        # These do not make a set:
-        hand = SetHand(self.card1, self.card2, card3)
-        self.assertFalse(hand.is_set())
 
         self.SUT.cards_by_encoding = {
             encoding1: self.card1,
@@ -109,22 +128,34 @@ class TestSetGameBoard(unittest.TestCase):
             encoding3: card3
         }
 
+        hand = self.SUT.remove_set(encoding1, encoding2, encoding3)
+
+        for card in (self.card1, self.card2, card3):
+            self.assertIn(card, hand.cards)
+
+    def test_board_find_set_returns_None_if_no_set_and_adds_to_waitlist(self):
+        self.contrive_no_match_in_deck()
+
+        # Move from the deck to the board:
+        for i in self.deck.cards:
+            self.SUT.draw_from_deck()
+
         self.assertIsNone(self.SUT.find_set())
 
-        missing_encoding = SetBoard.missing_encoding_from(encoding1, encoding2)
+        missing_encoding = SetBoard.missing_encoding_from(self.encoding1, self.encoding2)
         partners = self.SUT.waitlist[missing_encoding][0]
-        self.assertIn(encoding1, partners)
-        self.assertIn(encoding2, partners)
+        self.assertIn(self.encoding1, partners)
+        self.assertIn(self.encoding2, partners)
 
-        missing_encoding = SetBoard.missing_encoding_from(encoding2, encoding3)
+        missing_encoding = SetBoard.missing_encoding_from(self.encoding2, self.encoding3)
         partners = self.SUT.waitlist[missing_encoding][0]
-        self.assertIn(encoding2, partners)
-        self.assertIn(encoding3, partners)
+        self.assertIn(self.encoding2, partners)
+        self.assertIn(self.encoding3, partners)
 
-        missing_encoding = SetBoard.missing_encoding_from(encoding1, encoding3)
+        missing_encoding = SetBoard.missing_encoding_from(self.encoding1, self.encoding3)
         partners = self.SUT.waitlist[missing_encoding][0]
-        self.assertIn(encoding1, partners)
-        self.assertIn(encoding3, partners)
+        self.assertIn(self.encoding1, partners)
+        self.assertIn(self.encoding3, partners)
 
     def test_board_find_set_returns_hand_and_moves_cards_into_graveyard(self):
         encoding1 = self.card1.encoding
@@ -351,3 +382,50 @@ class TestSetGameBoard(unittest.TestCase):
         self.assertEqual(2, len(self.SUT.cards))
         for enc in (card4.encoding, card5.encoding):
             self.assertIn(enc, self.SUT.cards_by_encoding)
+
+    def test_board_deal_search_returns_hand_based_on_waitlist_and_updates(self):
+        self.contrive_no_match_in_deck()
+
+        # Existing cards whose missing third is card3:
+        existing_card1 = SetCard(
+            count=1,
+            color=SetColor.purple,
+            shading=SetShading.solid,
+            shape=SetShape.oval
+        )
+        existing_encoding1 = existing_card1.encoding
+
+        existing_card2 = SetCard(
+            count=2,
+            color=SetColor.purple,
+            shading=SetShading.solid,
+            shape=SetShape.oval
+        )
+        existing_encoding2 = existing_card2.encoding
+
+        generated_encoding3 = SetBoard.missing_encoding_from(
+            existing_encoding1,
+            existing_encoding2
+        )
+        self.assertEqual(self.encoding3, generated_encoding3)
+
+        self.SUT.cards_by_encoding = {
+            existing_encoding1: existing_card1,
+            existing_encoding2: existing_card2
+        }
+
+        # Set up waitlist:
+        self.SUT.add_to_waitlist(self.encoding3, existing_encoding1, existing_encoding2)
+
+        # Deal in new cards and expect that card3 was found in the
+        # waitlist:
+        matching_hand = self.SUT.deal_and_search()
+        self.assertTrue(matching_hand.is_set())
+
+        for card in (self.card3, existing_card1, existing_card2):
+            self.assertIn(card, matching_hand.cards)
+            self.assertIn(card, self.SUT.graveyard)
+            self.assertNotIn(card, self.SUT.cards)
+
+    def test_board_deal_and_search_matches_two_new_cards_to_existing_card(self):
+        self.contrive_no_match_in_deck()

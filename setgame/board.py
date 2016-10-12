@@ -60,7 +60,8 @@ class SetBoard(object):
                 raise
 
         self.graveyard_by_encoding.update(tx)
-        return tx
+        cards = tx.values()
+        return SetHand(*cards)
 
     def add_to_waitlist(self, missing, partner_1, partner_2):
         '''
@@ -76,6 +77,35 @@ class SetBoard(object):
         except KeyError:
             self.waitlist[missing] = [set([partner_1, partner_2])]
 
+    def try_remove_from_waitlist(self, new_card_encoding):
+        '''
+        Return a hand of the card denoted by the given encoding
+        and its partners if they exist in the board. Raise
+        KeyError if the card is not on the waitlist or if the
+        partner cards have already been used in another set
+        and the waitlist entry has gone stale. The
+        new_card_encoding will idempotently not exist in the
+        waitlist afterward.'''
+
+        partner_sets = self.waitlist[new_card_encoding]
+
+        # Keep trying the partner cards until you find a group
+        # That isn't stale:
+        while len(partner_sets) > 0:
+            partners = list(partner_sets.pop())
+            partners.append(new_card_encoding)
+            try:
+                return self.remove_set(*partners)
+            except KeyError:
+                # At least one of the other two cards no longer
+                # exists on the board, so this particular partner
+                # duo is stale
+                pass
+
+        # All of the partner sets have gone stale:
+        del self.waitlist[new_card_encoding]
+        raise KeyError
+
     def find_set(self):
         '''
         Return a valid hand of three cards from the board or
@@ -89,15 +119,23 @@ class SetBoard(object):
         for i in range(len(encodings)):
             encoding_1 = encodings[i]
             for encoding_2 in encodings[i+1:]:
+
+                # Figure out what third card would be needed to make
+                # a valid hand with encoding_1 and encoding_2:
                 encoding_3 = SetBoard.missing_encoding_from(
                     encoding_1,
                     encoding_2
                 )
 
                 try:
-                    s = self.remove_set(encoding_3, encoding_2, encoding_1)
-                    return SetHand(s[encoding_1], s[encoding_2], s[encoding_3])
+                    # If the third card exists on the board, make a
+                    # valid set out of them:
+                    #s = self.remove_set(encoding_3, encoding_2, encoding_1)
+                    #return SetHand(s[encoding_1], s[encoding_2], s[encoding_3])
+                    return self.remove_set(encoding_3, encoding_2, encoding_1)
                 except KeyError:
+                    # Otherwise, record the third card on the waitlist
+                    # so we can make this group when the card shows up:
                     self.add_to_waitlist(encoding_3, encoding_1, encoding_2)
 
         return None
@@ -114,9 +152,28 @@ class SetBoard(object):
             # draw_from_deck already puts it in cards,
             # so we need to use this to add them to the
             # graveyard:
-            encs = [c.encoding for c in new_cards]
-            self.remove_set(*encs)
+            new_encodings = [c.encoding for c in new_cards]
+            self.remove_set(*new_encodings)
             return possible_hand
+
+        # Check waitlist to see if any of the new cards
+        # have an existing match:
+        for new_card in new_cards:
+            try:
+                return self.try_remove_from_waitlist(new_card.encoding)
+            except KeyError:
+                # No match for this card
+                pass
+
+        # TODO: Check pairs of new cards to see if the third was already
+        # on the board:
+
+        # We don't need to check new cards against the cards that were
+        # already on the board. If the third card in such a group were
+        # already on the board, we would have found the current card in
+        # the waitlist. If the third card were in this new hand dealt
+        # out, we would have found it when searching pairwise in the
+        # new deal-out.
 
     @staticmethod
     def missing_encoding_from(card_encoding_1, card_encoding_2):
