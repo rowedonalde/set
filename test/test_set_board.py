@@ -429,3 +429,28 @@ class TestSetGameBoard(unittest.TestCase):
 
     def test_board_deal_and_search_matches_two_new_cards_to_existing_card(self):
         self.contrive_no_match_in_deck()
+
+        matching_card = SetCard(
+            count=3,
+            color=SetColor.purple,
+            shading=SetShading.solid,
+            shape=SetShape.diamond
+        )
+        matching_encoding = matching_card.encoding
+
+        expected_matching_hand = SetHand(self.card1, self.card2, matching_card)
+        self.assertTrue(expected_matching_hand.is_set())
+
+        self.SUT.cards_by_encoding[matching_encoding] = matching_card
+
+        actual_matching_hand = self.SUT.deal_and_search()
+        self.assertTrue(actual_matching_hand.is_set())
+
+        for card in actual_matching_hand.cards:
+            self.assertIn(card, expected_matching_hand.cards)
+            self.assertIn(card, self.SUT.graveyard)
+            self.assertNotIn(card, self.SUT.cards)
+
+        non_matching_card = self.card3
+        self.assertNotIn(non_matching_card, self.SUT.graveyard)
+        self.assertIn(non_matching_card, self.SUT.cards)

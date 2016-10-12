@@ -106,15 +106,19 @@ class SetBoard(object):
         del self.waitlist[new_card_encoding]
         raise KeyError
 
-    def find_set(self):
+    def find_set(self, encodings=None):
         '''
         Return a valid hand of three cards from the board or
         None if there are no valid sets on the board.'''
 
+        # We can't refer to self for the default value, but by
+        # default we want to search with all the encodings:
+        if encodings is None:
+            encodings = self.cards_by_encoding.keys()
+
         # Search greedily for valid sets, and only compare
         # forward against cards we haven't tried so we don't
         # duplicate work:
-        encodings = self.cards_by_encoding.keys()
 
         for i in range(len(encodings)):
             encoding_1 = encodings[i]
@@ -130,8 +134,6 @@ class SetBoard(object):
                 try:
                     # If the third card exists on the board, make a
                     # valid set out of them:
-                    #s = self.remove_set(encoding_3, encoding_2, encoding_1)
-                    #return SetHand(s[encoding_1], s[encoding_2], s[encoding_3])
                     return self.remove_set(encoding_3, encoding_2, encoding_1)
                 except KeyError:
                     # Otherwise, record the third card on the waitlist
@@ -146,13 +148,14 @@ class SetBoard(object):
             new_card = self.draw_from_deck()
             new_cards.append(new_card)
 
+        new_encodings = [c.encoding for c in new_cards]
+
         possible_hand = SetHand(*new_cards)
 
         if possible_hand.is_set():
             # draw_from_deck already puts it in cards,
             # so we need to use this to add them to the
             # graveyard:
-            new_encodings = [c.encoding for c in new_cards]
             self.remove_set(*new_encodings)
             return possible_hand
 
@@ -165,8 +168,9 @@ class SetBoard(object):
                 # No match for this card
                 pass
 
-        # TODO: Check pairs of new cards to see if the third was already
+        # Check pairs of new cards to see if the third was already
         # on the board:
+        return self.find_set(encodings=new_encodings)
 
         # We don't need to check new cards against the cards that were
         # already on the board. If the third card in such a group were
