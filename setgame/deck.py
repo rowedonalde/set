@@ -5,6 +5,9 @@ from color import SetColor
 from shading import SetShading
 from shape import SetShape
 
+class DeckEmpty(Exception):
+    pass
+
 class SetDeck(object):
 
     def __init__(self):
@@ -28,6 +31,9 @@ class SetDeck(object):
         return self.cards_by_encoding.values()
 
     def draw_random(self):
+        if len(self.cards) == 0:
+            raise DeckEmpty("The deck is now out of cards.")
+
         encoding_key = random.choice(self.cards_by_encoding.keys())
 
         return self.cards_by_encoding.pop(encoding_key)

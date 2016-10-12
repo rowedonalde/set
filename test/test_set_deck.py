@@ -1,6 +1,6 @@
 import unittest
 
-from setgame import SetDeck
+from setgame import DeckEmpty, SetDeck
 
 class TestSetGameDeck(unittest.TestCase):
 
@@ -19,3 +19,9 @@ class TestSetGameDeck(unittest.TestCase):
 
         self.assertNotIn(card, self.SUT.cards)
         self.assertNotIn(card.encoding, self.SUT.cards_by_encoding)
+
+    def test_deck_draw_random_raises_DeckEmpty_when_no_cards_left(self):
+        self.SUT.cards_by_encoding = {}
+
+        with self.assertRaises(DeckEmpty):
+            self.SUT.draw_random()
