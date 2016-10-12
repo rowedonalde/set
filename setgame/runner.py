@@ -51,12 +51,12 @@ class SetRunner(object):
         self.log()
         self.log('Now the deck is empty, so let\'s burn down what we have:')
         self.log(self.board)
-        self.log()
 
         next_set = True
 
         while next_hand:
             next_hand = self.board.find_set()
+            self.log()
 
             if next_hand:
                 self.log('Set!')
