@@ -9,7 +9,7 @@ class SetShape(IntEnum):
     def format(s):
         formats = {
             SetShape.diamond: 'diamond',
-            SetShape.squiggles: 'squiggles',
+            SetShape.squiggles: 'squiggle',
             SetShape.oval: 'oval'
         }
 

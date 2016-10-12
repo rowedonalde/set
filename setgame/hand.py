@@ -3,6 +3,10 @@ class SetHand(object):
     def __init__(self, card1, card2, card3):
         self.cards = set([card1, card2, card3])
 
+    def __str__(self):
+        strs = [str(card) for card in self.cards]
+        return '\n'.join(strs)
+
     def is_set(self):
         '''
         Return true if these three cards represent a valid set in
