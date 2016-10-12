@@ -146,7 +146,7 @@ class SetBoard(object):
 
         return None
 
-    def deal_and_search(self):
+    def deal_and_search(self, quiet=True):
         new_cards = []
         for i in range(SetBoard.deal_size):
             new_card = self.draw_from_deck()
@@ -155,6 +155,9 @@ class SetBoard(object):
         new_encodings = [c.encoding for c in new_cards]
 
         possible_hand = SetHand(*new_cards)
+
+        if not quiet:
+            print 'Just drew these cards:\n{0}'.format(possible_hand)
 
         if possible_hand.is_set():
             # draw_from_deck already puts it in cards,
@@ -174,14 +177,16 @@ class SetBoard(object):
 
         # Check pairs of new cards to see if the third was already
         # on the board:
-        return self.find_set(encodings=new_encodings)
+        next_hand = self.find_set(encodings=new_encodings)
 
-        # We don't need to check new cards against the cards that were
-        # already on the board. If the third card in such a group were
-        # already on the board, we would have found the current card in
-        # the waitlist. If the third card were in this new hand dealt
-        # out, we would have found it when searching pairwise in the
-        # new deal-out.
+        # Over the course of a series of deal-outs, sets
+        # can form on the board not directly attributed to one
+        # deal-out. So, we also want to check the rest of the board
+        # for any sets that may have composed over time:
+        if next_hand is None:
+            next_hand = self.find_set()
+
+        return next_hand
 
     @staticmethod
     def missing_encoding_from(card_encoding_1, card_encoding_2):
