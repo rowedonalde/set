@@ -2,7 +2,7 @@ from hand import SetHand
 
 class SetBoard(object):
     start_size = 12
-    deal = 3
+    deal_size = 3
 
     def __init__(self, deck):
         # Get handle to deck:
@@ -101,6 +101,22 @@ class SetBoard(object):
                     self.add_to_waitlist(encoding_3, encoding_1, encoding_2)
 
         return None
+
+    def deal_and_search(self):
+        new_cards = []
+        for i in range(SetBoard.deal_size):
+            new_card = self.draw_from_deck()
+            new_cards.append(new_card)
+
+        possible_hand = SetHand(*new_cards)
+
+        if possible_hand.is_set():
+            # draw_from_deck already puts it in cards,
+            # so we need to use this to add them to the
+            # graveyard:
+            encs = [c.encoding for c in new_cards]
+            self.remove_set(*encs)
+            return possible_hand
 
     @staticmethod
     def missing_encoding_from(card_encoding_1, card_encoding_2):

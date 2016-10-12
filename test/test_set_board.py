@@ -296,3 +296,58 @@ class TestSetGameBoard(unittest.TestCase):
         self.assertIn(set([encoding1, encoding2]), partner_sets)
         self.assertIn(set([encoding3, encoding4]), partner_sets)
         self.assertIn(set([encoding5, encoding6]), partner_sets)
+
+    def test_board_deal_and_search_returns_immediately_if_new_cards_make_set(self):
+        encoding1 = self.card1.encoding
+        encoding2 = self.card2.encoding
+        card3 = SetCard(
+            count=3,
+            color=SetColor.purple,
+            shading=SetShading.solid,
+            shape=SetShape.diamond
+        )
+        encoding3 = card3.encoding
+
+        expected_hand = SetHand(self.card1, self.card2, card3)
+        self.assertTrue(expected_hand.is_set())
+
+        # Force a deal-out from the deck to return this matching set:
+        self.deck.cards_by_encoding = {
+            encoding1: self.card1,
+            encoding2: self.card2,
+            encoding3: card3
+        }
+
+        # These existing cards would make a set with card1:
+        card4 = SetCard(
+            count=2,
+            color=SetColor.red,
+            shading=SetShading.empty,
+            shape=SetShape.squiggles
+        )
+        card5 = SetCard(
+            count=3,
+            color=SetColor.red,
+            shading=SetShading.empty,
+            shape=SetShape.squiggles
+        )
+
+        self.SUT.cards_by_encoding = {
+            card4.encoding: card4,
+            card5.encoding: card5
+        }
+
+        would_be_hand = SetHand(self.card1, card4, card5)
+        self.assertTrue(would_be_hand.is_set())
+
+        new_hand = self.SUT.deal_and_search()
+
+        self.assertTrue(new_hand.is_set())
+
+        self.assertEqual(3, len(self.SUT.graveyard))
+        for enc in (encoding1, encoding2, encoding3):
+            self.assertIn(enc, self.SUT.graveyard_by_encoding)
+
+        self.assertEqual(2, len(self.SUT.cards))
+        for enc in (card4.encoding, card5.encoding):
+            self.assertIn(enc, self.SUT.cards_by_encoding)
