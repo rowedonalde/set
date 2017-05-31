@@ -14,3 +14,6 @@ To run tests:
 
 To watch the machine play Set:
 ./play_set.sh
+
+To start the API webserver (on port 5000):
+./web.sh
