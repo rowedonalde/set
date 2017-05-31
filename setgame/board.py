@@ -113,7 +113,12 @@ class SetBoard(object):
     def find_set(self, encodings=None):
         '''
         Return a valid hand of three cards from the board or
-        None if there are no valid sets on the board.'''
+        None if there are no valid sets on the board.
+
+        encodings -- Optionally only search for a third card which
+            would match against two cards in the given list (e.g.,
+            when immediately matching against a new deal-out) in
+            order to avoid duplicate work'''
 
         # We can't refer to self for the default value, but by
         # default we want to search with all the encodings:
@@ -147,6 +152,12 @@ class SetBoard(object):
         return None
 
     def deal_and_search(self, quiet=True):
+        '''
+        Deal out three new cards and immediately check if those
+        three new cards form a set, or if one or two of these
+        new cards match two or one existing cards. If there is
+        a set, return the set and put it in the graveyard.'''
+
         new_cards = []
         for i in range(SetBoard.deal_size):
             new_card = self.draw_from_deck()
