@@ -111,3 +111,18 @@ class TestSetGameCard(unittest.TestCase):
         expected_string = '2 green solid ovals'
 
         self.assertEqual(expected_string, str(card))
+
+    def test_string_to_card(self):
+        input_string = '1 red solid oval'
+        card = SetCard.from_str(input_string)
+        self.assertEqual(1, card.count)
+        self.assertEqual(SetColor.red, card.color)
+        self.assertEqual(SetShading.solid, card.shading)
+        self.assertEqual(SetShape.oval, card.shape)
+
+        input_string = '2 green solid ovals'
+        card = SetCard.from_str(input_string)
+        self.assertEqual(2, card.count)
+        self.assertEqual(SetColor.green, card.color)
+        self.assertEqual(SetShading.solid, card.shading)
+        self.assertEqual(SetShape.oval, card.shape)

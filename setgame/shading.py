@@ -1,16 +1,14 @@
-from aenum import IntEnum
+from base_mapped_enum import BaseMappedEnum
 
-class SetShading(IntEnum):
+class SetShading(BaseMappedEnum):
     solid = 0
     empty = 1
     striped = 2
 
     @staticmethod
-    def format(s):
-        formats = {
+    def get_format_mappings():
+        return {
             SetShading.solid: 'solid',
             SetShading.empty: 'empty',
             SetShading.striped: 'striped'
         }
-
-        return formats[s]

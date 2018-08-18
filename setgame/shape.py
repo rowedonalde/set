@@ -1,16 +1,14 @@
-from aenum import IntEnum
+from base_mapped_enum import BaseMappedEnum
 
-class SetShape(IntEnum):
+class SetShape(BaseMappedEnum):
     diamond = 0
     squiggles = 1
     oval = 2
 
     @staticmethod
-    def format(s):
-        formats = {
+    def get_format_mappings():
+        return {
             SetShape.diamond: 'diamond',
             SetShape.squiggles: 'squiggle',
             SetShape.oval: 'oval'
         }
-
-        return formats[s]

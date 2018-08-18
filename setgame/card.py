@@ -49,6 +49,13 @@ class SetCard(object):
 
         return outstr
 
+    @staticmethod
+    def from_str(card_string):
+        count, color, shading, shape = card_string.strip().split(' ')
+
+        # We strip a possible pluralizing 's' from the shape name:
+        return SetCard(int(count), SetColor.from_str(color), SetShading.from_str(shading), SetShape.from_str(shape.rstrip('s')))
+
     @property
     def encoding(self):
         if self._encoding is None:
