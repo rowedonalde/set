@@ -45,6 +45,11 @@ class SetBoard(object):
 
         return card
 
+    def deal_in(self):
+        '''Deal in three cards. Raises DeckEmpty if deck is empty.'''
+
+        return [self.draw_from_deck() for n in range(SetBoard.deal_size)]
+
     def remove_set(self, encoding_1, encoding_2, encoding_3):
         '''
         Move the cards denoted by the encodings into the
@@ -158,13 +163,8 @@ class SetBoard(object):
         new cards match two or one existing cards. If there is
         a set, return the set and put it in the graveyard.'''
 
-        new_cards = []
-        for i in range(SetBoard.deal_size):
-            new_card = self.draw_from_deck()
-            new_cards.append(new_card)
-
+        new_cards = self.deal_in()
         new_encodings = [c.encoding for c in new_cards]
-
         possible_hand = SetHand(*new_cards)
 
         if not quiet:
